@@ -3,42 +3,43 @@ import * as Contracts from '@ethersproject/contracts';
 import test from 'ava';
 import sinon from 'sinon';
 
+import { SupportedAsset } from './assets';
 import { exchangeRate } from './converter';
 import { Feed } from './priceFeeds';
 
 const testFeedsA: readonly Feed[] = [
   {
     id: 0,
-    from: 'A',
-    to: 'B',
+    from: 'AAVE',
+    to: 'BTC',
     address: '0xAB',
     decimals: 8,
   },
   {
     id: 1,
-    from: 'B',
-    to: 'C',
+    from: 'BTC',
+    to: 'COMP',
     address: '0xBC',
     decimals: 8,
   },
   {
     id: 2,
-    from: 'C',
-    to: 'D',
+    from: 'COMP',
+    to: 'DAI',
     address: '0xCD',
     decimals: 8,
   },
   {
     id: 3,
-    from: 'D',
-    to: 'E',
+    from: 'DAI',
+    to: 'ETH',
     address: '0xDE',
     decimals: 18,
   },
   {
     id: 4,
-    from: 'E',
-    to: 'F',
+    from: 'ETH',
+    to: 'FIL',
     address: '0xEF',
     decimals: 18,
   },
@@ -105,8 +106,8 @@ test('0Anything to 0Unknown', async (t) => {
   const provider = sinon.fake();
 
   const result = await exchangeRate(
-    'Anything',
-    'Unknown',
+    'Anything' as SupportedAsset,
+    'Unknown' as SupportedAsset,
     provider,
     testFeedsA
   );
@@ -117,7 +118,7 @@ test('0Anything to 0Unknown', async (t) => {
 test('A to A', async (t) => {
   const provider = sinon.fake();
 
-  const result = await exchangeRate('A', 'A', provider, testFeedsA);
+  const result = await exchangeRate('AAVE', 'AAVE', provider, testFeedsA);
 
   t.deepEqual(result, '1');
 });
@@ -125,7 +126,7 @@ test('A to A', async (t) => {
 test('A to B', async (t) => {
   const provider = sinon.fake();
 
-  const result = await exchangeRate('A', 'B', provider, testFeedsA);
+  const result = await exchangeRate('AAVE', 'BTC', provider, testFeedsA);
 
   t.deepEqual(result, '100');
 });
@@ -133,7 +134,7 @@ test('A to B', async (t) => {
 test('A to C', async (t) => {
   const provider = sinon.fake();
 
-  const result = await exchangeRate('A', 'C', provider, testFeedsA);
+  const result = await exchangeRate('AAVE', 'COMP', provider, testFeedsA);
 
   t.deepEqual(result, '20');
 });
@@ -141,7 +142,7 @@ test('A to C', async (t) => {
 test('A to D', async (t) => {
   const provider = sinon.fake();
 
-  const result = await exchangeRate('A', 'D', provider, testFeedsA);
+  const result = await exchangeRate('AAVE', 'DAI', provider, testFeedsA);
 
   t.deepEqual(result, '0.02');
 });
@@ -149,7 +150,7 @@ test('A to D', async (t) => {
 test('D to A', async (t) => {
   const provider = sinon.fake();
 
-  const result = await exchangeRate('D', 'A', provider, testFeedsA);
+  const result = await exchangeRate('DAI', 'AAVE', provider, testFeedsA);
 
   t.deepEqual(result, '50');
 });
@@ -157,7 +158,7 @@ test('D to A', async (t) => {
 test('C to D', async (t) => {
   const provider = sinon.fake();
 
-  const result = await exchangeRate('C', 'D', provider, testFeedsA);
+  const result = await exchangeRate('COMP', 'DAI', provider, testFeedsA);
 
   t.deepEqual(result, '0.001');
 });
@@ -165,7 +166,7 @@ test('C to D', async (t) => {
 test('D to F', async (t) => {
   const provider = sinon.fake();
 
-  const result = await exchangeRate('D', 'F', provider, testFeedsA);
+  const result = await exchangeRate('DAI', 'FIL', provider, testFeedsA);
 
   t.deepEqual(result, '0.999999999999999999');
 });

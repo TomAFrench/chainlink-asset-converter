@@ -1,284 +1,98 @@
 export const supportedAssets = [
-  {
-    code: 'USD',
-  },
-  {
-    code: 'ETH',
-  },
-  {
-    code: 'BTC',
-  },
-  {
-    code: 'LINK',
-  },
-  {
-    code: 'XAU',
-  },
-  {
-    code: 'SNX',
-  },
-  {
-    code: 'DAI',
-  },
-  {
-    code: 'COMP',
-  },
-  {
-    code: 'DASH',
-  },
-  {
-    code: 'AUD',
-  },
-  {
-    code: 'LTC',
-  },
-  {
-    code: 'GBP',
-  },
-  {
-    code: 'ETC',
-  },
-  {
-    code: 'BCH',
-  },
-  {
-    code: 'XRP',
-  },
-  {
-    code: 'EOS',
-  },
-  {
-    code: 'XAG',
-  },
-  {
-    code: 'KNC',
-  },
-  {
-    code: 'SDEFI',
-  },
-  {
-    code: 'FIL',
-  },
-  {
-    code: 'MCAP',
-  },
-  {
-    code: 'XMR',
-  },
-  {
-    code: 'BNT',
-  },
-  {
-    code: 'SXP',
-  },
-  {
-    code: 'TRX',
-  },
-  {
-    code: 'N225',
-  },
-  {
-    code: 'UNI',
-  },
-  {
-    code: 'XTZ',
-  },
-  {
-    code: 'DOT',
-  },
-  {
-    code: 'JPY',
-  },
-  {
-    code: 'EUR',
-  },
-  {
-    code: 'BNB',
-  },
-  {
-    code: 'OXT',
-  },
-  {
-    code: 'ADX',
-  },
-  {
-    code: 'YFI',
-  },
-  {
-    code: 'SCEX',
-  },
-  {
-    code: 'REN',
-  },
-  {
-    code: 'FNX',
-  },
-  {
-    code: 'BRENT',
-  },
-  {
-    code: 'AAVE',
-  },
-  {
-    code: 'FTSE',
-  },
-  {
-    code: 'CHF',
-  },
-  {
-    code: 'ADA',
-  },
-  {
-    code: 'USDC',
-  },
-  {
-    code: 'USDT',
-  },
-  {
-    code: 'SUSD',
-  },
-  {
-    code: 'TUSD',
-  },
-  {
-    code: 'ZRX',
-  },
-  {
-    code: 'BAT',
-  },
-  {
-    code: 'LRC',
-  },
-  {
-    code: 'MKR',
-  },
-  {
-    code: 'MANA',
-  },
-  {
-    code: 'BUSD',
-  },
-  {
-    code: 'REP',
-  },
-  {
-    code: 'ENJ',
-  },
-  {
-    code: 'CRV',
-  },
-  {
-    code: 'PAX',
-  },
-  {
-    code: 'XDR',
-  },
-  {
-    code: 'CRO',
-  },
-  {
-    code: 'DMG',
-  },
-  {
-    code: 'RCN',
-  },
-  {
-    code: 'BZRX',
-  },
-  {
-    code: 'WOM',
-  },
-  {
-    code: 'BAL',
-  },
-  {
-    code: 'BAND',
-  },
-  {
-    code: 'CEL',
-  },
-  {
-    code: 'COVER',
-  },
-  {
-    code: 'CREAM',
-  },
-  {
-    code: 'DPI',
-  },
-  {
-    code: 'FTT',
-  },
-  {
-    code: 'HEGIC',
-  },
-  {
-    code: 'KP3R',
-  },
-  {
-    code: 'MLN',
-  },
-  {
-    code: 'MTA',
-  },
-  {
-    code: 'NMR',
-  },
-  {
-    code: 'OMG',
-  },
-  {
-    code: 'RLC',
-  },
-  {
-    code: 'RUNE',
-  },
-  {
-    code: 'SRM',
-  },
-  {
-    code: 'SUSHI',
-  },
-  {
-    code: 'UMA',
-  },
-  {
-    code: 'USDK',
-  },
-  {
-    code: 'UST',
-  },
-  {
-    code: 'WNXM',
-  },
-  {
-    code: 'YFII',
-  },
-  {
-    code: 'ARS',
-  },
-  {
-    code: 'CNY',
-  },
-  {
-    code: 'IOST',
-  },
-  {
-    code: 'TSLA',
-  },
-  {
-    code: 'XHV',
-  },
-  {
-    code: '1INCH',
-  },
-  {
-    code: 'ANT',
-  },
-  {
-    code: 'AMPL',
-  },
-  {
-    code: 'BADGER',
-  },
-];
+  'USD',
+  'ETH',
+  'BTC',
+  'LINK',
+  'XAU',
+  'SNX',
+  'DAI',
+  'COMP',
+  'DASH',
+  'AUD',
+  'LTC',
+  'GBP',
+  'ETC',
+  'BCH',
+  'XRP',
+  'EOS',
+  'XAG',
+  'KNC',
+  'SDEFI',
+  'FIL',
+  'MCAP',
+  'XMR',
+  'BNT',
+  'SXP',
+  'TRX',
+  'N225',
+  'UNI',
+  'XTZ',
+  'DOT',
+  'JPY',
+  'EUR',
+  'BNB',
+  'OXT',
+  'ADX',
+  'YFI',
+  'SCEX',
+  'REN',
+  'FNX',
+  'BRENT',
+  'AAVE',
+  'FTSE',
+  'CHF',
+  'ADA',
+  'USDC',
+  'USDT',
+  'SUSD',
+  'TUSD',
+  'ZRX',
+  'BAT',
+  'LRC',
+  'MKR',
+  'MANA',
+  'BUSD',
+  'REP',
+  'ENJ',
+  'CRV',
+  'PAX',
+  'XDR',
+  'CRO',
+  'DMG',
+  'RCN',
+  'BZRX',
+  'WOM',
+  'BAL',
+  'BAND',
+  'CEL',
+  'COVER',
+  'CREAM',
+  'DPI',
+  'FTT',
+  'HEGIC',
+  'KP3R',
+  'MLN',
+  'MTA',
+  'NMR',
+  'OMG',
+  'RLC',
+  'RUNE',
+  'SRM',
+  'SUSHI',
+  'UMA',
+  'USDK',
+  'UST',
+  'WNXM',
+  'YFII',
+  'ARS',
+  'CNY',
+  'IOST',
+  'TSLA',
+  'XHV',
+  '1INCH',
+  'ANT',
+  'AMPL',
+  'BADGER',
+] as const;
+
+export type SupportedAsset = typeof supportedAssets[number];

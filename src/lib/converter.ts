@@ -1,6 +1,7 @@
 import { Provider } from '@ethersproject/providers';
 import { BigNumber } from 'bignumber.js';
 
+import { SupportedAsset } from './assets';
 import { Feed, mainnetPriceFeeds } from './priceFeeds';
 import { getLatestQuote } from './quotes';
 import { getShortestPath, Path, PathSection } from './shortestPath';
@@ -82,8 +83,8 @@ const calculateExchangeRate = (
  * @returns {string | null} returns the exchange rate `from`:`to`, if this cannot be calculated then returns null
  */
 export const exchangeRate = async (
-  from: string,
-  to: string,
+  from: SupportedAsset,
+  to: SupportedAsset,
   provider: Provider,
   feeds: readonly Feed[] = mainnetPriceFeeds
 ): Promise<string | null> => {

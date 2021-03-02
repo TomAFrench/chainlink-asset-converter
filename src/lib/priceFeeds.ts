@@ -1,7 +1,9 @@
+import { SupportedAsset } from './assets';
+
 export type Feed = {
   readonly id: number;
-  readonly from: string;
-  readonly to: string;
+  readonly from: SupportedAsset;
+  readonly to: SupportedAsset;
   readonly address: string;
   readonly decimals: number;
 };

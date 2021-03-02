@@ -6,43 +6,43 @@ import { getShortestPath, Path } from './shortestPath';
 const testFeedsA: readonly Feed[] = [
   {
     id: 0,
-    from: 'A',
-    to: 'B',
+    from: 'AAVE',
+    to: 'BTC',
     address: '',
     decimals: 1,
   },
   {
     id: 1,
-    from: 'B',
-    to: 'C',
+    from: 'BTC',
+    to: 'COMP',
     address: '',
     decimals: 1,
   },
   {
     id: 2,
-    from: 'C',
-    to: 'D',
+    from: 'COMP',
+    to: 'DAI',
     address: '',
     decimals: 1,
   },
   {
     id: 3,
-    from: 'D',
-    to: 'E',
+    from: 'DAI',
+    to: 'ETH',
     address: '',
     decimals: 1,
   },
   {
     id: 4,
-    from: 'E',
-    to: 'F',
+    from: 'ETH',
+    to: 'FIL',
     address: '',
     decimals: 1,
   },
   {
     id: 5,
-    from: 'B',
-    to: 'F',
+    from: 'BTC',
+    to: 'FIL',
     address: '',
     decimals: 1,
   },
@@ -56,7 +56,7 @@ const shortestPathFromAToB: Path = [
 ];
 
 test('shortestPathAToB', (t) => {
-  t.deepEqual(getShortestPath('A', 'B', testFeedsA), shortestPathFromAToB);
+  t.deepEqual(getShortestPath('AAVE', 'BTC', testFeedsA), shortestPathFromAToB);
 });
 
 const shortestPathFromAToC: Path = [
@@ -71,7 +71,10 @@ const shortestPathFromAToC: Path = [
 ];
 
 test('shortestPathAToC', (t) => {
-  t.deepEqual(getShortestPath('A', 'C', testFeedsA), shortestPathFromAToC);
+  t.deepEqual(
+    getShortestPath('AAVE', 'COMP', testFeedsA),
+    shortestPathFromAToC
+  );
 });
 
 const shortestPathFromAToD: Path = [
@@ -90,7 +93,7 @@ const shortestPathFromAToD: Path = [
 ];
 
 test('shortestPathAToD', (t) => {
-  t.deepEqual(getShortestPath('A', 'D', testFeedsA), shortestPathFromAToD);
+  t.deepEqual(getShortestPath('AAVE', 'DAI', testFeedsA), shortestPathFromAToD);
 });
 
 const shortestPathFromDToA: Path = [
@@ -109,7 +112,7 @@ const shortestPathFromDToA: Path = [
 ];
 
 test('shortestPathDToA', (t) => {
-  t.deepEqual(getShortestPath('D', 'A', testFeedsA), shortestPathFromDToA);
+  t.deepEqual(getShortestPath('DAI', 'AAVE', testFeedsA), shortestPathFromDToA);
 });
 
 const shortestPathFromEToB: Path = [
@@ -124,5 +127,5 @@ const shortestPathFromEToB: Path = [
 ];
 
 test('shortestPathEToB', (t) => {
-  t.deepEqual(getShortestPath('E', 'B', testFeedsA), shortestPathFromEToB);
+  t.deepEqual(getShortestPath('ETH', 'BTC', testFeedsA), shortestPathFromEToB);
 });
