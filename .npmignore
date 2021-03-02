@@ -1,0 +1,18 @@
+# Directories
+.circleci
+.github
+.nyc_output
+src
+
+# Files
+.cspell.json
+.editorconfig
+.eslintignore
+.eslintrc.json
+.gitignore
+.prettierignore
+tsconfig.json
+tsconfig.module.json
+
+*.log
+*.tgz
