@@ -4,7 +4,7 @@ Easy conversion between any of the assets currently supported by [Chainlink's pr
 
 ## Installation
 
-`yarn add chainlink-asset-converter`
+`yarn add @tomfrench/chainlink-asset-converter`
 
 ## Basic Usage
 
