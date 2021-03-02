@@ -85,7 +85,7 @@ describe('exchangeRate', () => {
       }),
     });
 
-    sinon.replace(Contracts, 'Contract', contractConstructorStub);
+    sinon.replace(Contracts, 'Contract', contractConstructorStub as any);
   });
 
   afterEach(() => {
@@ -99,7 +99,7 @@ describe('exchangeRate', () => {
       const result = await exchangeRate(
         'Anything' as SupportedAsset,
         'Unknown' as SupportedAsset,
-        provider,
+        provider as any,
         testFeedsA,
       );
 
@@ -128,7 +128,7 @@ describe('exchangeRate', () => {
     it('returns null', async () => {
       const provider = sinon.fake();
 
-      const result = await exchangeRate('AAVE', 'DAI', provider, disconnectedFeeds);
+      const result = await exchangeRate('AAVE', 'DAI', provider as any, disconnectedFeeds);
 
       expect(result).toBe(null);
     });
@@ -148,7 +148,7 @@ describe('exchangeRate', () => {
     it.each(testData)('Correctly calculates the exchange rate', async ([from, to], expectedExchangeRate) => {
       const provider = sinon.fake();
 
-      const result = await exchangeRate(from, to, provider, testFeedsA);
+      const result = await exchangeRate(from, to, provider as any, testFeedsA);
 
       expect(result).toBe(expectedExchangeRate);
     });
