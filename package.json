@@ -1,6 +1,6 @@
 {
   "name": "@tomfrench/chainlink-asset-converter",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Asset conversion utils powered by Chainlink price feeds",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
