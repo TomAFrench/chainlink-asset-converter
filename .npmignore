@@ -11,8 +11,10 @@ src
 .eslintrc.json
 .gitignore
 .prettierignore
+.prettierrc
+jest.config.json
 tsconfig.json
-tsconfig.module.json
+tsconfig.production.json
 
 *.log
 *.tgz
