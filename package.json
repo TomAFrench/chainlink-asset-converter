@@ -42,9 +42,9 @@
     "node": ">=10"
   },
   "dependencies": {
-    "@ensdomains/ensjs": "^2.0.0",
-    "bignumber.js": "^9.0.1",
-    "ethers": "^5.0.19"
+    "@ethersproject/contracts": "^5.0.11",
+    "@ethersproject/providers": "^5.0.23",
+    "bignumber.js": "^9.0.1"
   },
   "devDependencies": {
     "@ava/typescript": "^1.1.1",

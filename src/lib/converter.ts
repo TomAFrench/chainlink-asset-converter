@@ -1,5 +1,6 @@
+import { Contract } from '@ethersproject/contracts';
+import { JsonRpcProvider } from '@ethersproject/providers';
 import { BigNumber } from 'bignumber.js';
-import { ethers } from 'ethers';
 
 import { Feed, mainnetPriceFeeds } from './priceFeeds';
 import { getShortestPath, Path, PathSection } from './shortestPath';
@@ -21,7 +22,7 @@ export type ConvertProps = {
   /**
    * The JsonRpcProvider (either this or the `endpoint` must be provided)
    */
-  readonly provider?: ethers.providers.JsonRpcProvider;
+  readonly provider?: JsonRpcProvider;
   /**
    * The JSON RPC endpoint (either this or the `provider` must be provided)
    */
@@ -125,8 +126,8 @@ export const convert = async (options: ConvertProps): Promise<string> => {
  */
 export const createProvider = (
   endpoint: string
-): ethers.providers.JsonRpcProvider => {
-  return new ethers.providers.JsonRpcProvider(endpoint);
+): JsonRpcProvider => {
+  return new JsonRpcProvider(endpoint);
 };
 
 /**
@@ -136,7 +137,7 @@ export const createProvider = (
  */
 const createAggregatorContract = (
   address: string,
-  provider: ethers.providers.JsonRpcProvider
+  provider: JsonRpcProvider
 ) => {
   const aggregatorV3InterfaceABI = [
     {
@@ -188,7 +189,7 @@ const createAggregatorContract = (
     },
   ];
 
-  return new ethers.Contract(address, aggregatorV3InterfaceABI, provider);
+  return new Contract(address, aggregatorV3InterfaceABI, provider);
 };
 
 /**
