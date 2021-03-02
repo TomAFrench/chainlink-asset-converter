@@ -1,5 +1,4 @@
-import test from 'ava';
-
+import { SupportedAsset } from './assets';
 import { Feed } from './priceFeeds';
 import { getShortestPath, Path } from './shortestPath';
 
@@ -55,10 +54,6 @@ const shortestPathFromAToB: Path = [
   },
 ];
 
-test('shortestPathAToB', (t) => {
-  t.deepEqual(getShortestPath('AAVE', 'BTC', testFeedsA), shortestPathFromAToB);
-});
-
 const shortestPathFromAToC: Path = [
   {
     feedId: 0,
@@ -69,13 +64,6 @@ const shortestPathFromAToC: Path = [
     inverse: false,
   },
 ];
-
-test('shortestPathAToC', (t) => {
-  t.deepEqual(
-    getShortestPath('AAVE', 'COMP', testFeedsA),
-    shortestPathFromAToC
-  );
-});
 
 const shortestPathFromAToD: Path = [
   {
@@ -92,10 +80,6 @@ const shortestPathFromAToD: Path = [
   },
 ];
 
-test('shortestPathAToD', (t) => {
-  t.deepEqual(getShortestPath('AAVE', 'DAI', testFeedsA), shortestPathFromAToD);
-});
-
 const shortestPathFromDToA: Path = [
   {
     feedId: 2,
@@ -111,10 +95,6 @@ const shortestPathFromDToA: Path = [
   },
 ];
 
-test('shortestPathDToA', (t) => {
-  t.deepEqual(getShortestPath('DAI', 'AAVE', testFeedsA), shortestPathFromDToA);
-});
-
 const shortestPathFromEToB: Path = [
   {
     feedId: 4,
@@ -126,6 +106,16 @@ const shortestPathFromEToB: Path = [
   },
 ];
 
-test('shortestPathEToB', (t) => {
-  t.deepEqual(getShortestPath('ETH', 'BTC', testFeedsA), shortestPathFromEToB);
+const testData: readonly (readonly [readonly [SupportedAsset, SupportedAsset], Path])[] = [
+  [['AAVE', 'BTC'], shortestPathFromAToB],
+  [['AAVE', 'COMP'], shortestPathFromAToC],
+  [['AAVE', 'DAI'], shortestPathFromAToD],
+  [['DAI', 'AAVE'], shortestPathFromDToA],
+  [['ETH', 'BTC'], shortestPathFromEToB],
+];
+
+describe('getShortestPath', () => {
+  it.each(testData)('calculates the shortest path', ([start, end], expectedPath) => {
+    expect(getShortestPath(start, end, testFeedsA)).toEqual(expectedPath);
+  });
 });
