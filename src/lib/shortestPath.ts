@@ -1,4 +1,4 @@
-import { Feed, mainnetPriceFeeds } from './priceFeeds';
+import { Feed, getFeedById, mainnetPriceFeeds } from './priceFeeds';
 
 export type Path = readonly PathSection[];
 
@@ -6,13 +6,6 @@ export type PathSection = {
   readonly feedId: number;
   readonly inverse: boolean;
 };
-
-/**
- * @ignore
- * @param id
- * @param feeds
- */
-const getFeedById = (id: number, feeds: readonly Feed[]) => feeds.find((feed: Feed) => feed.id === id);
 
 /**
  * @ignore
@@ -36,7 +29,7 @@ const getFeedsWhereToMatches = (asset: string, feeds: readonly Feed[]) =>
  * @param feeds
  */
 const getAssetOnOtherSideOfPathSection = (pathSection: PathSection, feeds: readonly Feed[]) => {
-  const feed = getFeedById(pathSection.feedId, feeds);
+  const feed = getFeedById(pathSection.feedId, feeds) as Feed;
   return pathSection.inverse === false ? feed.to : feed.from;
 };
 

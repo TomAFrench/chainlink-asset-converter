@@ -8,6 +8,14 @@ export type Feed = {
   readonly decimals: number;
 };
 
+/**
+ * @ignore
+ * @param id
+ * @param feeds
+ */
+export const getFeedById = (id: number, feeds: readonly Feed[]): Feed | undefined =>
+  feeds.find((feed: Feed) => feed.id === id);
+
 const ETH_USD_AGGREGATOR = 'eth-usd.data.eth';
 const BTC_USD_AGGREGATOR = 'btc-usd.data.eth';
 const LINK_USD_AGGREGATOR = 'link-usd.data.eth';

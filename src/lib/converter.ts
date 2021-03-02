@@ -2,7 +2,7 @@ import { Provider } from '@ethersproject/providers';
 import { BigNumber } from 'bignumber.js';
 
 import { SupportedAsset } from './assets';
-import { Feed, mainnetPriceFeeds } from './priceFeeds';
+import { Feed, getFeedById, mainnetPriceFeeds } from './priceFeeds';
 import { getLatestQuote } from './quotes';
 import { getShortestPath, Path, PathSection } from './shortestPath';
 
@@ -23,7 +23,7 @@ const getPathQuotes = (path: Path, feeds: readonly Feed[], provider: Provider): 
     path.map(
       async (pathSection: PathSection): Promise<PathSectionQuote> => {
         const { feedId, inverse } = pathSection;
-        const { address: feedAddress, decimals } = feeds.find((feed: Feed) => feed.id === feedId);
+        const { address: feedAddress, decimals } = getFeedById(feedId, feeds) as Feed;
 
         // Decorate the path section with the feed's current quote
         const { answer } = await getLatestQuote(feedAddress, provider);
