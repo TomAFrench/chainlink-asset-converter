@@ -18,18 +18,12 @@ type PathSectionQuote = {
  * @param feeds - array of feeds which contains the path of interest
  * @param provider - provider from which to query feed quotes
  */
-const getPathQuotes = (
-  path: Path,
-  feeds: readonly Feed[],
-  provider: Provider
-): Promise<readonly PathSectionQuote[]> =>
+const getPathQuotes = (path: Path, feeds: readonly Feed[], provider: Provider): Promise<readonly PathSectionQuote[]> =>
   Promise.all(
     path.map(
       async (pathSection: PathSection): Promise<PathSectionQuote> => {
         const { feedId, inverse } = pathSection;
-        const { address: feedAddress, decimals } = feeds.find(
-          (feed: Feed) => feed.id === feedId
-        );
+        const { address: feedAddress, decimals } = feeds.find((feed: Feed) => feed.id === feedId);
 
         // Decorate the path section with the feed's current quote
         const { answer } = await getLatestQuote(feedAddress, provider);
@@ -38,31 +32,22 @@ const getPathQuotes = (
           decimals,
           inverse,
         };
-      }
-    )
+      },
+    ),
   );
 
 /**
  * Calculate the exchange rate over a path of intermediate rates between two assets
  * @param pathQuotes - an array of quotes for each path section between two assets
  */
-const calculateExchangeRate = (
-  pathQuotes: readonly PathSectionQuote[]
-): BigNumber =>
-  pathQuotes.reduce(
-    (_newAmount: BigNumber, pathSection: PathSectionQuote): BigNumber => {
-      const { decimals, inverse, quote } = pathSection;
+const calculateExchangeRate = (pathQuotes: readonly PathSectionQuote[]): BigNumber =>
+  pathQuotes.reduce((_newAmount: BigNumber, pathSection: PathSectionQuote): BigNumber => {
+    const { decimals, inverse, quote } = pathSection;
 
-      const exchangeRate = new BigNumber(quote).dividedBy(
-        new BigNumber(10).exponentiatedBy(decimals)
-      );
+    const exchangeRate = new BigNumber(quote).dividedBy(new BigNumber(10).exponentiatedBy(decimals));
 
-      return inverse
-        ? _newAmount.dividedBy(exchangeRate)
-        : _newAmount.multipliedBy(exchangeRate);
-    },
-    new BigNumber('1')
-  );
+    return inverse ? _newAmount.dividedBy(exchangeRate) : _newAmount.multipliedBy(exchangeRate);
+  }, new BigNumber('1'));
 
 /**
  * Calculate the exchange rate between one asset and another.
@@ -86,7 +71,7 @@ export const exchangeRate = async (
   from: SupportedAsset,
   to: SupportedAsset,
   provider: Provider,
-  feeds: readonly Feed[] = mainnetPriceFeeds
+  feeds: readonly Feed[] = mainnetPriceFeeds,
 ): Promise<string | null> => {
   if (from === to) return '1';
 

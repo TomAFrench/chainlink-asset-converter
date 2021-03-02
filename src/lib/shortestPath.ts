@@ -12,8 +12,7 @@ export type PathSection = {
  * @param id
  * @param feeds
  */
-const getFeedById = (id: number, feeds: readonly Feed[]) =>
-  feeds.find((feed: Feed) => feed.id === id);
+const getFeedById = (id: number, feeds: readonly Feed[]) => feeds.find((feed: Feed) => feed.id === id);
 
 /**
  * @ignore
@@ -36,10 +35,7 @@ const getFeedsWhereToMatches = (asset: string, feeds: readonly Feed[]) =>
  * @param pathSection
  * @param feeds
  */
-const getAssetOnOtherSideOfPathSection = (
-  pathSection: PathSection,
-  feeds: readonly Feed[]
-) => {
+const getAssetOnOtherSideOfPathSection = (pathSection: PathSection, feeds: readonly Feed[]) => {
   const feed = getFeedById(pathSection.feedId, feeds);
   return pathSection.inverse === false ? feed.to : feed.from;
 };
@@ -59,7 +55,7 @@ const getShortestPathRecursively = (
   fromAsset: string,
   toAsset: string,
   feeds: readonly Feed[],
-  currentPathSectionArray: readonly PathSection[] = []
+  currentPathSectionArray: readonly PathSection[] = [],
 ): Path => {
   // Find all feeds containing our 'fromAsset' in their 'from' prop
   const matchingFromFeeds = getFeedsWhereFromMatches(fromAsset, feeds);
@@ -84,8 +80,7 @@ const getShortestPathRecursively = (
   ];
 
   const matches = pathSectionsToTraverse.filter(
-    (pathSection: PathSection) =>
-      getAssetOnOtherSideOfPathSection(pathSection, feeds) === toAsset
+    (pathSection: PathSection) => getAssetOnOtherSideOfPathSection(pathSection, feeds) === toAsset,
   );
 
   // Return match
@@ -95,32 +90,20 @@ const getShortestPathRecursively = (
   // No matches - traverse the next descendants
 
   // Exclude feeds we have already found matches in
-  const traversedFeedIdsThisRound = pathSectionsToTraverse.map(
-    (pathSection: PathSection) => pathSection.feedId
-  );
-  const newFeeds = feeds.filter(
-    (feed: Feed) => !traversedFeedIdsThisRound.includes(feed.id)
-  );
+  const traversedFeedIdsThisRound = pathSectionsToTraverse.map((pathSection: PathSection) => pathSection.feedId);
+  const newFeeds = feeds.filter((feed: Feed) => !traversedFeedIdsThisRound.includes(feed.id));
 
   return (
     pathSectionsToTraverse
       .map((pathSection: PathSection) => {
-        const nextFromAsset = getAssetOnOtherSideOfPathSection(
-          pathSection,
-          feeds
-        );
-        return getShortestPathRecursively(nextFromAsset, toAsset, newFeeds, [
-          ...currentPathSectionArray,
-          pathSection,
-        ]);
+        const nextFromAsset = getAssetOnOtherSideOfPathSection(pathSection, feeds);
+        return getShortestPathRecursively(nextFromAsset, toAsset, newFeeds, [...currentPathSectionArray, pathSection]);
       })
       // Filter out any empty paths
       .filter((path: Path) => path && path.length > 0)
       // Take the shortest path
       .reduce((previous, current) => {
-        return previous.length > current.length || previous.length === 0
-          ? current
-          : previous;
+        return previous.length > current.length || previous.length === 0 ? current : previous;
       }, [])
   );
 };
@@ -167,8 +150,5 @@ const getShortestPathRecursively = (
  * @param feeds The feeds representing the paths between all vertices
  * @returns [[`Path`]] representing the shortest path between our origin and destination asset vertices
  */
-export const getShortestPath = (
-  fromAsset: string,
-  toAsset: string,
-  feeds: readonly Feed[] = mainnetPriceFeeds
-): Path => getShortestPathRecursively(fromAsset, toAsset, feeds);
+export const getShortestPath = (fromAsset: string, toAsset: string, feeds: readonly Feed[] = mainnetPriceFeeds): Path =>
+  getShortestPathRecursively(fromAsset, toAsset, feeds);
