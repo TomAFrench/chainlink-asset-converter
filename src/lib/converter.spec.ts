@@ -1,8 +1,9 @@
+import { BigNumber } from '@ethersproject/bignumber';
+import * as Contracts from '@ethersproject/contracts';
 import test from 'ava';
-import { BigNumber, ethers } from 'ethers';
 import sinon from 'sinon';
 
-import { convert } from './converter';
+import { exchangeRate } from './converter';
 import { Feed } from './priceFeeds';
 
 const testFeedsA: readonly Feed[] = [
@@ -93,7 +94,7 @@ test.before(() => {
       }),
     });
 
-  sinon.replace(ethers, 'Contract', contractConstructorStub);
+  sinon.replace(Contracts, 'Contract', contractConstructorStub);
 });
 
 test.after.always(() => {
@@ -103,153 +104,68 @@ test.after.always(() => {
 test('0Anything to 0Unknown', async (t) => {
   const provider = sinon.fake();
 
-  const result = await convert({
-    amount: 0,
-    from: 'Anything',
-    to: 'Unknown',
+  const result = await exchangeRate(
+    'Anything',
+    'Unknown',
     provider,
-    feeds: testFeedsA,
-  });
+    testFeedsA
+  );
 
-  t.deepEqual(result, '0');
+  t.deepEqual(result, null);
 });
 
-test('5A to 5A', async (t) => {
+test('A to A', async (t) => {
   const provider = sinon.fake();
 
-  const result = await convert({
-    amount: 5,
-    from: 'A',
-    to: 'A',
-    provider,
-    feeds: testFeedsA,
-  });
+  const result = await exchangeRate('A', 'A', provider, testFeedsA);
 
-  t.deepEqual(result, '5');
+  t.deepEqual(result, '1');
 });
 
-test('5A to 500B', async (t) => {
+test('A to B', async (t) => {
   const provider = sinon.fake();
 
-  const result = await convert({
-    amount: 5,
-    from: 'A',
-    to: 'B',
-    provider,
-    feeds: testFeedsA,
-  });
-
-  t.deepEqual(result, '500');
-});
-
-test('5A to 100C', async (t) => {
-  const provider = sinon.fake();
-
-  const result = await convert({
-    amount: 5,
-    from: 'A',
-    to: 'C',
-    provider,
-    feeds: testFeedsA,
-  });
+  const result = await exchangeRate('A', 'B', provider, testFeedsA);
 
   t.deepEqual(result, '100');
 });
 
-test('5A to .1D', async (t) => {
+test('A to C', async (t) => {
   const provider = sinon.fake();
 
-  const result = await convert({
-    amount: 5,
-    from: 'A',
-    to: 'D',
-    provider,
-    feeds: testFeedsA,
-  });
+  const result = await exchangeRate('A', 'C', provider, testFeedsA);
 
-  t.deepEqual(result, '0.1');
+  t.deepEqual(result, '20');
 });
 
-test('5D to 250A', async (t) => {
+test('A to D', async (t) => {
   const provider = sinon.fake();
 
-  const result = await convert({
-    amount: 5,
-    from: 'D',
-    to: 'A',
-    provider,
-    feeds: testFeedsA,
-  });
+  const result = await exchangeRate('A', 'D', provider, testFeedsA);
 
-  t.deepEqual(result, '250');
+  t.deepEqual(result, '0.02');
 });
 
-test('.001C to .000001D', async (t) => {
+test('D to A', async (t) => {
   const provider = sinon.fake();
 
-  const result = await convert({
-    amount: 0.001,
-    from: 'C',
-    to: 'D',
-    provider,
-    feeds: testFeedsA,
-  });
+  const result = await exchangeRate('D', 'A', provider, testFeedsA);
 
-  t.deepEqual(result, '0.000001');
+  t.deepEqual(result, '50');
 });
 
-test('1000000A to 100000000B', async (t) => {
+test('C to D', async (t) => {
   const provider = sinon.fake();
 
-  const result = await convert({
-    amount: 1_000_000,
-    from: 'A',
-    to: 'B',
-    provider,
-    feeds: testFeedsA,
-  });
+  const result = await exchangeRate('C', 'D', provider, testFeedsA);
 
-  t.deepEqual(result, '100000000');
+  t.deepEqual(result, '0.001');
 });
 
-test('1D to .999999999999999999F', async (t) => {
+test('D to F', async (t) => {
   const provider = sinon.fake();
 
-  const result = await convert({
-    amount: 1,
-    from: 'D',
-    to: 'F',
-    provider,
-    feeds: testFeedsA,
-  });
+  const result = await exchangeRate('D', 'F', provider, testFeedsA);
 
   t.deepEqual(result, '0.999999999999999999');
-});
-
-test('No endpoint + no provider', async (t) => {
-  const promise = convert({
-    amount: 1,
-    from: 'A',
-    to: 'B',
-    feeds: testFeedsA,
-  });
-
-  const error = await t.throwsAsync(promise);
-
-  t.is(error.message, `Either 'provider' or 'endpoint' must be defined`);
-});
-
-test('No provider, only endpoint', async (t) => {
-  const providerFake = sinon.fake();
-  sinon.replace(ethers.providers, 'JsonRpcProvider', providerFake);
-
-  const result = await convert({
-    amount: 1,
-    from: 'A',
-    to: 'A',
-    feeds: testFeedsA,
-    endpoint: 'http://localhost:test',
-  });
-
-  t.deepEqual(result, '1');
 });

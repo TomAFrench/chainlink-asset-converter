@@ -1,113 +1,58 @@
-import { Contract } from '@ethersproject/contracts';
-import { JsonRpcProvider } from '@ethersproject/providers';
+import { Provider } from '@ethersproject/providers';
 import { BigNumber } from 'bignumber.js';
 
 import { Feed, mainnetPriceFeeds } from './priceFeeds';
+import { getLatestQuote } from './quotes';
 import { getShortestPath, Path, PathSection } from './shortestPath';
 
-/** Options for {@link convert} */
-export type ConvertProps = {
-  /**
-   * The amount of the `from` asset to convert
-   */
-  readonly amount: number;
-  /**
-   * The asset to convert from
-   */
-  readonly from: string;
-  /**
-   * The asset to convert to
-   */
-  readonly to: string;
-  /**
-   * The JsonRpcProvider (either this or the `endpoint` must be provided)
-   */
-  readonly provider?: JsonRpcProvider;
-  /**
-   * The JSON RPC endpoint (either this or the `provider` must be provided)
-   */
-  readonly endpoint?: string;
-  /**
-   * Optionally pass in a custom array of price feeds
-   */
-  readonly feeds?: readonly Feed[];
+type PathSectionQuote = {
+  readonly inverse: boolean;
+  readonly quote: BigNumber;
+  readonly decimals: number;
 };
 
 /**
- * Convert a known amount in one asset to some amount of another asset.
  *
- * ### Example
- * ``` typescript
- * await convert({
- *  amount: 5,
- *  from: 'ETH',
- *  to: 'BTC',
- *  endpoint: 'https://mainnet.infura.io/v3/ab01ab01ab01ab01ab01ab01'
- * });
- * // => '0.2'
- * ```
- *
- * @param {ConvertProps} options
- * @returns The resulting amount of the `to` asset after conversion
+ * @param path - path array linking two assets
+ * @param feeds - array of feeds which contains the path of interest
+ * @param provider - provider from which to query feed quotes
  */
-export const convert = async (options: ConvertProps): Promise<string> => {
-  const {
-    amount = 0,
-    from,
-    to,
-    provider = null,
-    endpoint = '',
-    feeds = mainnetPriceFeeds,
-  } = options;
+const getPathQuotes = (
+  path: Path,
+  feeds: readonly Feed[],
+  provider: Provider
+): Promise<readonly PathSectionQuote[]> =>
+  Promise.all(
+    path.map(
+      async (pathSection: PathSection): Promise<PathSectionQuote> => {
+        const { feedId, inverse } = pathSection;
+        const { address: feedAddress, decimals } = feeds.find(
+          (feed: Feed) => feed.id === feedId
+        );
 
-  if (amount === 0) return '0';
-
-  if (provider == null && endpoint == '') {
-    return Promise.reject(
-      new Error(`Either 'provider' or 'endpoint' must be defined`)
-    );
-  }
-
-  if (from == null) {
-    return Promise.reject(new Error(`'from' must be defined`));
-  }
-  if (to == null) {
-    return Promise.reject(new Error(`'to' must be defined`));
-  }
-
-  const internalProvider = provider ? provider : createProvider(endpoint);
-
-  const shortestPath: Path = getShortestPath(from, to, feeds);
-
-  if (shortestPath.length === 0) return amount.toString();
-
-  const getLatestAnswerPromises = shortestPath.map(
-    (pathSection: PathSection) => {
-      const { feedId } = pathSection;
-      const { address: feedAddress } = feeds.find(
-        (feed: Feed) => feed.id === feedId
-      );
-      const aggregatorContract = createAggregatorContract(
-        feedAddress,
-        internalProvider
-      );
-      return getLatest(aggregatorContract);
-    }
+        // Decorate the path section with the feed's current quote
+        const { answer } = await getLatestQuote(feedAddress, provider);
+        return {
+          quote: answer,
+          decimals,
+          inverse,
+        };
+      }
+    )
   );
 
-  const latestAnswers = await Promise.all(getLatestAnswerPromises);
+/**
+ * Calculate the exchange rate over a path of intermediate rates between two assets
+ * @param pathQuotes - an array of quotes for each path section between two assets
+ */
+const calculateExchangeRate = (
+  pathQuotes: readonly PathSectionQuote[]
+): BigNumber =>
+  pathQuotes.reduce(
+    (_newAmount: BigNumber, pathSection: PathSectionQuote): BigNumber => {
+      const { decimals, inverse, quote } = pathSection;
 
-  const result: BigNumber = shortestPath.reduce(
-    (
-      _newAmount: BigNumber,
-      pathSection: PathSection,
-      index: number
-    ): BigNumber => {
-      const { feedId, inverse } = pathSection;
-      const { decimals } = feeds.find((feed: Feed) => feed.id === feedId);
-
-      const { answer } = latestAnswers[index];
-      const exchangeRate = new BigNumber(answer.toString()).dividedBy(
+      const exchangeRate = new BigNumber(quote.toString()).dividedBy(
         new BigNumber(10).exponentiatedBy(decimals)
       );
 
@@ -115,85 +60,41 @@ export const convert = async (options: ConvertProps): Promise<string> => {
         ? _newAmount.dividedBy(exchangeRate)
         : _newAmount.multipliedBy(exchangeRate);
     },
-    new BigNumber(amount)
+    new BigNumber('1')
   );
 
-  return result.toString();
-};
-
 /**
- * @param endpoint Your Ethereum JSON-RPC endpoint
+ * Calculate the exchange rate between one asset and another.
+ *
+ * ### Example
+ * ``` typescript
+ * await exchangeRate(
+ *  'ETH',
+ *  'BTC',
+ *  new JsonRpcProvider('https://mainnet.infura.io/v3/ab01ab01ab01ab01ab01ab01')
+ * );
+ * // => '0.2'
+ * ```
+ * @param from - the ticker symbol of the input asset
+ * @param to - the ticker symbol of the output asset
+ * @param provider - provider from which to query feed quotes
+ * @param feeds - array of Chainlink price feeds to query (defaults to mainnet price feeds)
+ * @returns {string | null} returns the exchange rate `from`:`to`, if this cannot be calculated then returns null
  */
-export const createProvider = (
-  endpoint: string
-): JsonRpcProvider => {
-  return new JsonRpcProvider(endpoint);
+export const exchangeRate = async (
+  from: string,
+  to: string,
+  provider: Provider,
+  feeds: readonly Feed[] = mainnetPriceFeeds
+): Promise<string | null> => {
+  if (from === to) return '1';
+
+  const shortestPath: Path = getShortestPath(from, to, feeds);
+
+  // Could not find a path between provided assets
+  if (shortestPath.length === 0) return null;
+
+  const pathQuotes = await getPathQuotes(shortestPath, feeds, provider);
+
+  return calculateExchangeRate(pathQuotes).toString();
 };
-
-/**
- * @ignore
- * @param address
- * @param provider
- */
-const createAggregatorContract = (
-  address: string,
-  provider: JsonRpcProvider
-) => {
-  const aggregatorV3InterfaceABI = [
-    {
-      inputs: [],
-      name: 'decimals',
-      outputs: [{ internalType: 'uint8', name: '', type: 'uint8' }],
-      stateMutability: 'view',
-      type: 'function',
-    },
-    {
-      inputs: [],
-      name: 'description',
-      outputs: [{ internalType: 'string', name: '', type: 'string' }],
-      stateMutability: 'view',
-      type: 'function',
-    },
-    {
-      inputs: [{ internalType: 'uint80', name: '_roundId', type: 'uint80' }],
-      name: 'getRoundData',
-      outputs: [
-        { internalType: 'uint80', name: 'roundId', type: 'uint80' },
-        { internalType: 'int256', name: 'answer', type: 'int256' },
-        { internalType: 'uint256', name: 'startedAt', type: 'uint256' },
-        { internalType: 'uint256', name: 'updatedAt', type: 'uint256' },
-        { internalType: 'uint80', name: 'answeredInRound', type: 'uint80' },
-      ],
-      stateMutability: 'view',
-      type: 'function',
-    },
-    {
-      inputs: [],
-      name: 'latestRoundData',
-      outputs: [
-        { internalType: 'uint80', name: 'roundId', type: 'uint80' },
-        { internalType: 'int256', name: 'answer', type: 'int256' },
-        { internalType: 'uint256', name: 'startedAt', type: 'uint256' },
-        { internalType: 'uint256', name: 'updatedAt', type: 'uint256' },
-        { internalType: 'uint80', name: 'answeredInRound', type: 'uint80' },
-      ],
-      stateMutability: 'view',
-      type: 'function',
-    },
-    {
-      inputs: [],
-      name: 'version',
-      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-      stateMutability: 'view',
-      type: 'function',
-    },
-  ];
-
-  return new Contract(address, aggregatorV3InterfaceABI, provider);
-};
-
-/**
- * @ignore
- * @param contract
- */
-const getLatest = async (contract) => await contract.latestRoundData();

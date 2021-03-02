@@ -19,6 +19,7 @@
         "dependabot",
         "editorconfig",
         "esnext",
+        "ethersproject",
         "Ethereum",
         "execa",
         "exponentiate",
