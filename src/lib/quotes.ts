@@ -1,3 +1,4 @@
+import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { Provider } from '@ethersproject/providers';
 
@@ -56,5 +57,8 @@ const aggregatorV3InterfaceABI = [
  * @param address
  * @param provider
  */
-export const getLatestQuote = async (address: string, provider: Provider) =>
+export const getLatestQuote = async (
+  address: string,
+  provider: Provider
+): Promise<{ readonly answer: BigNumber }> =>
   new Contract(address, aggregatorV3InterfaceABI, provider).latestRoundData();

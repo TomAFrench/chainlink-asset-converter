@@ -8,7 +8,7 @@ import { getShortestPath, Path, PathSection } from './shortestPath';
 
 type PathSectionQuote = {
   readonly inverse: boolean;
-  readonly quote: BigNumber;
+  readonly quote: string;
   readonly decimals: number;
 };
 
@@ -34,7 +34,7 @@ const getPathQuotes = (
         // Decorate the path section with the feed's current quote
         const { answer } = await getLatestQuote(feedAddress, provider);
         return {
-          quote: answer,
+          quote: answer.toString(),
           decimals,
           inverse,
         };
@@ -53,7 +53,7 @@ const calculateExchangeRate = (
     (_newAmount: BigNumber, pathSection: PathSectionQuote): BigNumber => {
       const { decimals, inverse, quote } = pathSection;
 
-      const exchangeRate = new BigNumber(quote.toString()).dividedBy(
+      const exchangeRate = new BigNumber(quote).dividedBy(
         new BigNumber(10).exponentiatedBy(decimals)
       );
 

@@ -8,52 +8,41 @@ export type PathSection = {
 };
 
 /**
- * By modelling a tree where all the assets are our vertices and all the price feeds
- * are our path sections between those vertices, we can recursively traverse through to find the
- * shortest path between our origin asset and the destination asset.
- *
- * ### Example
- * ``` typescript
- * const feeds: readonly Feed[] = [
- *   {
- *     id: 0,
- *     from: 'ETH',
- *     to: 'USD',
- *     address: '',
- *     decimals: 1,
- *   },
- *   {
- *     id: 1,
- *     from: 'BTC',
- *     to: 'USD',
- *     address: '',
- *     decimals: 1,
- *   }
- * ];
- *
- * getShortestPath('ETH', 'BTC', feeds);
- * // => [
- * //   {
- * //     feedId: 0,
- * //     inverse: false,
- * //   },
- * //   {
- * //     feedId: 1,
- * //     inverse: true,
- * //   },
- * // ];
- * ```
- *
- * @param fromAsset The asset vertex to begin pathing from for this iteration
- * @param toAsset The destination asset vertex (the asset we ultimately wish to convert to)
- * @param feeds The feeds representing the paths between all vertices
- * @returns [[`Path`]] representing the shortest path between our origin and destination asset vertices
+ * @ignore
+ * @param id
+ * @param feeds
  */
-export const getShortestPath = (
-  fromAsset: string,
-  toAsset: string,
-  feeds: readonly Feed[] = mainnetPriceFeeds
-): Path => getShortestPathRecursively(fromAsset, toAsset, feeds);
+const getFeedById = (id: number, feeds: readonly Feed[]) =>
+  feeds.find((feed: Feed) => feed.id === id);
+
+/**
+ * @ignore
+ * @param asset
+ * @param feeds
+ */
+const getFeedsWhereFromMatches = (asset: string, feeds: readonly Feed[]) =>
+  feeds.filter((feed: Feed) => feed.from === asset);
+
+/**
+ * @ignore
+ * @param asset
+ * @param feeds
+ */
+const getFeedsWhereToMatches = (asset: string, feeds: readonly Feed[]) =>
+  feeds.filter((feed: Feed) => feed.to === asset);
+
+/**
+ * @ignore
+ * @param pathSection
+ * @param feeds
+ */
+const getAssetOnOtherSideOfPathSection = (
+  pathSection: PathSection,
+  feeds: readonly Feed[]
+) => {
+  const feed = getFeedById(pathSection.feedId, feeds);
+  return pathSection.inverse === false ? feed.to : feed.from;
+};
 
 /**
  * @ignore
@@ -104,72 +93,82 @@ const getShortestPathRecursively = (
     return [...currentPathSectionArray, matches[0]];
   }
   // No matches - traverse the next descendants
-  else {
-    // Exclude feeds we have already found matches in
-    const traversedFeedIdsThisRound = pathSectionsToTraverse.map(
-      (pathSection: PathSection) => pathSection.feedId
-    );
-    const newFeeds = feeds.filter(
-      (feed: Feed) => !traversedFeedIdsThisRound.includes(feed.id)
-    );
 
-    return (
-      pathSectionsToTraverse
-        .map((pathSection: PathSection) => {
-          const nextFromAsset = getAssetOnOtherSideOfPathSection(
-            pathSection,
-            feeds
-          );
-          return getShortestPathRecursively(nextFromAsset, toAsset, newFeeds, [
-            ...currentPathSectionArray,
-            pathSection,
-          ]);
-        })
-        // Filter out any empty paths
-        .filter((path: Path) => path && path.length > 0)
-        // Take the shortest path
-        .reduce((previous, current) => {
-          return previous.length > current.length || previous.length === 0
-            ? current
-            : previous;
-        }, [])
-    );
-  }
+  // Exclude feeds we have already found matches in
+  const traversedFeedIdsThisRound = pathSectionsToTraverse.map(
+    (pathSection: PathSection) => pathSection.feedId
+  );
+  const newFeeds = feeds.filter(
+    (feed: Feed) => !traversedFeedIdsThisRound.includes(feed.id)
+  );
+
+  return (
+    pathSectionsToTraverse
+      .map((pathSection: PathSection) => {
+        const nextFromAsset = getAssetOnOtherSideOfPathSection(
+          pathSection,
+          feeds
+        );
+        return getShortestPathRecursively(nextFromAsset, toAsset, newFeeds, [
+          ...currentPathSectionArray,
+          pathSection,
+        ]);
+      })
+      // Filter out any empty paths
+      .filter((path: Path) => path && path.length > 0)
+      // Take the shortest path
+      .reduce((previous, current) => {
+        return previous.length > current.length || previous.length === 0
+          ? current
+          : previous;
+      }, [])
+  );
 };
 
 /**
- * @ignore
- * @param id
- * @param feeds
+ * By modelling a tree where all the assets are our vertices and all the price feeds
+ * are our path sections between those vertices, we can recursively traverse through to find the
+ * shortest path between our origin asset and the destination asset.
+ *
+ * ### Example
+ * ``` typescript
+ * const feeds: readonly Feed[] = [
+ *   {
+ *     id: 0,
+ *     from: 'ETH',
+ *     to: 'USD',
+ *     address: '',
+ *     decimals: 1,
+ *   },
+ *   {
+ *     id: 1,
+ *     from: 'BTC',
+ *     to: 'USD',
+ *     address: '',
+ *     decimals: 1,
+ *   }
+ * ];
+ *
+ * getShortestPath('ETH', 'BTC', feeds);
+ * // => [
+ * //   {
+ * //     feedId: 0,
+ * //     inverse: false,
+ * //   },
+ * //   {
+ * //     feedId: 1,
+ * //     inverse: true,
+ * //   },
+ * // ];
+ * ```
+ *
+ * @param fromAsset The asset vertex to begin pathing from for this iteration
+ * @param toAsset The destination asset vertex (the asset we ultimately wish to convert to)
+ * @param feeds The feeds representing the paths between all vertices
+ * @returns [[`Path`]] representing the shortest path between our origin and destination asset vertices
  */
-const getFeedById = (id: number, feeds: readonly Feed[]) =>
-  feeds.find((feed: Feed) => feed.id === id);
-
-/**
- * @ignore
- * @param asset
- * @param feeds
- */
-const getFeedsWhereFromMatches = (asset: string, feeds: readonly Feed[]) =>
-  feeds.filter((feed: Feed) => feed.from === asset);
-
-/**
- * @ignore
- * @param asset
- * @param feeds
- */
-const getFeedsWhereToMatches = (asset: string, feeds: readonly Feed[]) =>
-  feeds.filter((feed: Feed) => feed.to === asset);
-
-/**
- * @ignore
- * @param pathSection
- * @param feeds
- */
-const getAssetOnOtherSideOfPathSection = (
-  pathSection: PathSection,
-  feeds: readonly Feed[]
-) => {
-  const feed = getFeedById(pathSection.feedId, feeds);
-  return pathSection.inverse === false ? feed.to : feed.from;
-};
+export const getShortestPath = (
+  fromAsset: string,
+  toAsset: string,
+  feeds: readonly Feed[] = mainnetPriceFeeds
+): Path => getShortestPathRecursively(fromAsset, toAsset, feeds);
